@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const Blog = require('./models/blog');
+const { sortBy } = require('lodash');
+const { response } = require('express');
 
 //express app
 const app = express();
@@ -20,6 +22,7 @@ app.set('view engine', 'ejs');
 
 //middleware & static files
 app.use(express.static('public')); //LOOK IN THE PUBLIC FOLDER FOR STATIC FILES
+app.use(express.urlencoded({extended: true})) //extended true: optional
 app.use(morgan('dev'));
 
 //mongoose and mongo sandbox routes
@@ -59,17 +62,8 @@ app.get('/all-blogs', (req, res) => {
         })
 })
 
-//listen for requests -> BELOOOOOW
-
 app.get('/', (req, res) => {
-    const blogs = [
-        { title: "Rogues do it from behind", snippet: "Cheap shot, backstab, backstab, kidney shot, backstab, backstab, eviscerate" },
-        { title: "Warlock is a mushroom class", snippet: "Fear resistance increased for all classes by 95%" },
-        { title: "Warrior buff nerfed", snippet: "500 hps trinket nerfed to 495 hps." },
-    ];
-
-    //res.send('<p>home page</p>')
-    res.render('index', { title: 'Home', blogs }); //vagy: blogs: blogs
+    res.redirect('/blogs');
 })
 
 app.get('/about', (req, res) => {
@@ -79,6 +73,43 @@ app.get('/about', (req, res) => {
 
 app.get('/about-us', (req, res) => {
     res.redirect('/about');
+})
+
+//blog routes
+
+app.get('/blogs', (req, res) => {
+    Blog.find().sort({createdAt: -1}) //-1: descending order -> newest -> oldest
+        .then((result) => { //needs to be passed into index.ejs
+            res.render('index', { title: 'All Blogs', blogs: result })
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+})
+
+app.post('/blogs', (req, res) => {
+    //middleware needed! URLENCODED
+    //console.log(req.body);
+    const blog = new Blog(req.body)
+
+    blog.save() //save that to the db whoa
+    .then((result) => {
+        res.redirect('/blogs');
+    })
+    .catch((err) => {
+        console.log(err);
+    })
+})
+
+app.get('/blogs/:id', (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    Blog.findById(id)
+    .then(result => {
+        res.render('details', {blog: result, title: 'Blog Details'})
+    })
+    .catch(err => {
+        console.log(err)});
 })
 
 app.get('/blogs/create', (req, res) => {
