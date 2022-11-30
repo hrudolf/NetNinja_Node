@@ -9,7 +9,7 @@ const { response } = require('express');
 const app = express();
 
 //connect to mongodb
-const dbURI = 'mongodb+srv://new-user-007:W6lqeY9jYN3LguQF@cluster0.hfxn1g6.mongodb.net/dummy-website?retryWrites=true&w=majority'
+const dbURI = 'mongodb+srv://<username>:<password>@cluster0.hfxn1g6.mongodb.net/dummy-website?retryWrites=true&w=majority'
 mongoose.connect(dbURI)
     .then((result) => app.listen(3000, () => {
         console.log("DB connected");
