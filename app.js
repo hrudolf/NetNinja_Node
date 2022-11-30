@@ -1,10 +1,17 @@
 const express = require('express');
+const morgan = require('morgan');
 
 //express app
 const app = express();
 
 //register view engine
 app.set('view engine', 'ejs');
+
+//middleware & static files
+app.use(express.static('public')); //LOOK IN THE PUBLIC FOLDER FOR STATIC FILES
+app.use(morgan('dev'));
+
+//listen for requests -> BELOOOOOW
 
 app.get('/', (req, res) => {
     const blogs = [
